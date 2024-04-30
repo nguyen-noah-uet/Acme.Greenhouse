@@ -1,0 +1,63 @@
+﻿@using Acme.Greenhouse.Blazor.Components
+@using Volo.Abp.AspNetCore.Components.Web.BasicTheme.Themes.Basic
+@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@implements IDialogContentComponent
+
+<style>
+    #customized-wizard li[status="current"] > div {
+        font-weight: bold;
+    }
+
+    #customized-wizard li[disabled] > div {
+        color: var(--neutral-stroke-strong-rest);
+        opacity: var(--disabled-opacity);
+    }
+</style>
+<FluentMessageBarProvider Section="FlowcharDialog" MaxMessageCount="1" />
+
+@if (Dialog != null)
+{
+    <!-- Header -->
+    <FluentDialogHeader ShowDismiss="true">
+        <FluentLabel Typo="Typography.PaneHeader">Flowchart</FluentLabel>
+    </FluentDialogHeader>
+
+    <!-- Body -->
+    <FluentDialogBody>
+        <div>
+            <FluentAccordion ActiveId="acc-1">
+                <FluentAccordionItem Expanded="true">
+                    <HeadingTemplate>
+                        <div class="h5">Data acquisition flowchart</div>
+                    </HeadingTemplate>
+                    <ChildContent>
+                        <DataAcquisitionWizard></DataAcquisitionWizard>
+                    </ChildContent>
+                </FluentAccordionItem>
+                <FluentAccordionItem Expanded="true">
+                    <HeadingTemplate>
+                        <div class="h5">Device control flowchart</div>
+                    </HeadingTemplate>
+                    <ChildContent>
+                        <DeviceControlWizard></DeviceControlWizard>
+                    </ChildContent>
+                </FluentAccordionItem>
+            </FluentAccordion>
+        </div>
+    </FluentDialogBody>
+    <!-- Footer -->
+    <FluentDialogFooter>
+    </FluentDialogFooter>
+}
+
+@code {
+
+
+    [CascadingParameter]
+    public FluentDialog? Dialog { get; set; }
+    int Value = 0;
+    private void ToggleDialogPrimaryActionButton(bool enable)
+    {
+        Dialog!.TogglePrimaryActionButton(enable);
+    }
+}

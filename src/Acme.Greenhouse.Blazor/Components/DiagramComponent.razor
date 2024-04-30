@@ -1,0 +1,245 @@
+﻿@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using Acme.Greenhouse.Blazor.Pages
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Extensions
+@using Acme.Greenhouse.Nodes
+@using Microsoft.Extensions.Logging
+@using MQTTnet
+@using MQTTnet.Client
+@using MQTTnet.Extensions.ManagedClient
+@using Volo.Abp.Application.Dtos
+@inject IManagedMqttClient MqttService
+@inject ILogger<DiagramComponent> Logger
+@inject INodeService NodeService
+@inject ISensorService SensorService
+@inject IDeviceService DeviceService
+@inherits GreenhouseComponentBase
+<div id="diagram" class="position-relative">
+    <div class="DiagramMarker" Id="pump1">@(_pump1.IsOn ? "1" : "0")</div>
+    <div class="DiagramMarker" Id="pump2">@(_pump2.IsOn ? "1" : "0")</div>
+    <div class="DiagramMarker" Id="pump3">@(_pump3.IsOn ? "1" : "0")</div>
+    <div class="DiagramMarker" id="soil-moisture-value">@(_soilMoisture.CurrentValue.ToString("0.0"))%</div>
+    @* <FluentBadge Class="DiagramMarker" Id="soil-moisture-value" Appearance="Appearance.Accent">@_soilMoisture.CurrentValue %</FluentBadge> *@
+    <div class="DiagramMarker" id="ph-value">@(_pH.CurrentValue.ToString("0.0"))</div>
+    @* <div id="ph-value">@_pH.CurrentValue</div> *@
+    <div class="DiagramMarker" Id="ec-value">@(_ec.CurrentValue.ToString("0000"))µS/cm</div>
+    @* <div Id="ec-value">@_ec.CurrentValue</div> *@
+    <div class="DiagramMarker" id="IC1"></div>
+    <div class="DiagramMarker" id="IC2"></div>
+    <div class="DiagramMarker" id="IC3"></div>
+    <div class="DiagramMarker" id="Broker"></div>
+    <FluentTooltip Class="tooltip" Anchor="Broker" Position="TooltipPosition.Right" AutoUpdateMode="AutoUpdateMode.Auto">
+        <FluentStack Orientation="Orientation.Vertical">
+            <div>
+                <span>Uptime: 1717372 seconds</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>Active clients: 5</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>Received: 141253545</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>Sent: 24125546</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+        </FluentStack>
+    </FluentTooltip>
+    <FluentTooltip Class="tooltip" Anchor="IC1" Position="TooltipPosition.Top" AutoUpdateMode="AutoUpdateMode.Auto">
+        <FluentStack Orientation="Orientation.Vertical">
+            <div>
+                <span>Pump 1: </span>
+                @if (_pump1.IsOn)
+                {
+                    <FluentBadge Appearance="Appearance.Accent">ON</FluentBadge>
+                }
+                else
+                {
+                    <FluentBadge BackgroundColor="red" Color="white">OFF</FluentBadge>
+                }
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>Pump 2: </span>
+                @if (_pump2.IsOn)
+                {
+                    <FluentBadge Appearance="Appearance.Accent">ON</FluentBadge>
+                }
+                else
+                {
+                    <FluentBadge BackgroundColor="red" Color="white">OFF</FluentBadge>
+                }
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>Pump 3: </span>
+                @if (_pump3.IsOn)
+                {
+                    <FluentBadge Appearance="Appearance.Accent">ON</FluentBadge>
+                }
+                else
+                {
+                    <FluentBadge BackgroundColor="red" Color="white">OFF</FluentBadge>
+                }
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+        </FluentStack>
+    </FluentTooltip>
+    <FluentTooltip Class="tooltip" Anchor="IC2" Position="TooltipPosition.Right" Delay="200">
+        <FluentStack Orientation="Orientation.Vertical">
+            <div>
+                <span>Soil moisture: @(_soilMoisture.CurrentValue.ToString("0.0")) %</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+        </FluentStack>
+    </FluentTooltip>
+    <FluentTooltip Class="tooltip" Anchor="IC3" Position="TooltipPosition.Right" Delay="200">
+        <FluentStack Orientation="Orientation.Vertical">
+            <div>
+                <span>pH: @(_pH.CurrentValue.ToString("0.0"))</span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+            <div>
+                <span>EC: <FluentBadge Appearance="Appearance.Accent">@(_ec.CurrentValue.ToString("0.0")) µS/cm</FluentBadge></span>
+                <FluentDivider Style="width: 100%;"></FluentDivider>
+            </div>
+        </FluentStack>
+    </FluentTooltip>
+</div>
+
+@code {
+    List<NodeViewModel> _nodes = new();
+    DeviceViewModel _pump1 = new();
+    DeviceViewModel _pump2 = new();
+    DeviceViewModel _pump3 = new();
+    SensorViewModel _soilMoisture = new();
+    SensorViewModel _pH = new();
+    SensorViewModel _ec = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadNodes();
+            MqttService.ApplicationMessageReceivedAsync -= OnMessageReceived;
+            MqttService.ApplicationMessageReceivedAsync += OnMessageReceived;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+        }
+    }
+
+    private async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
+    {
+        try
+        {
+            var topic = arg.ApplicationMessage.Topic!;
+            bool changed = false;
+            var payloadString = arg.ApplicationMessage.ConvertPayloadToString();
+            await InvokeAsync(() =>
+            {
+                switch (topic)
+                {
+                    case "device-status/1/":
+                        if (_pump1 != null)
+                        {
+                            bool currentStatus = payloadString == "1";
+                            if (_pump1.IsOn != currentStatus)
+                            {
+                                _pump1.IsOn = currentStatus;
+                                changed = true;
+                            }
+                        }
+
+                        break;
+                    case "device-status/2/":
+                        if (_pump2 != null)
+                        {
+                            bool currentStatus = payloadString == "1";
+                            if (_pump2.IsOn != currentStatus)
+                            {
+                                _pump2.IsOn = currentStatus;
+                                changed = true;
+                            }
+                        }
+
+                        break;
+                    case "device-status/3/":
+                        if (_pump3 != null)
+                        {
+                            bool currentStatus = payloadString == "1";
+                            if (_pump3.IsOn != currentStatus)
+                            {
+                                _pump3.IsOn = currentStatus;
+                                changed = true;
+                            }
+                        }
+
+                        break;
+                    case "sensors/1/":
+                        if (_soilMoisture != null)
+                        {
+                            _soilMoisture.CurrentValue = double.Parse(payloadString).Smooth();;
+                            changed = true;
+                        }
+
+                        break;
+                    case "sensors/2/":
+                        if (_pH != null)
+                        {
+                            _pH.CurrentValue = double.Parse(payloadString);
+                            changed = true;
+                        }
+
+                        break;
+                    case "sensors/3/":
+                        if (_ec != null)
+                        {
+                            _ec.CurrentValue = double.Parse(payloadString);
+                            changed = true;
+                        }
+
+                        break;
+                }
+
+                if (changed)
+                {
+                    StateHasChanged();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+        }
+    }
+
+    private async Task LoadNodes()
+    {
+        // Load nodes
+        var nodes = await NodeService.GetListAsync(new PagedAndSortedResultRequestDto() { Sorting = "id" });
+        for (int i = 0; i < nodes.TotalCount; i++)
+        {
+            var m = new NodeViewModel()
+            {
+                Node = nodes.Items[i],
+                IsOnline = false,
+                Sensors = (await SensorService.GetByNodeId(nodes.Items[i].Id)).Select(x => new SensorViewModel() { Sensor = x }).ToList(),
+                Devices = (await DeviceService.GetByNodeId(nodes.Items[i].Id)).Select(x => new DeviceViewModel() { Device = x }).ToList()
+            };
+            _nodes.Add(m);
+        }
+
+        _pump1 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 1);
+        _pump2 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 2);
+        _pump3 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 3);
+        _soilMoisture = _nodes.FirstOrDefault(x => x.Node.Id == 2)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 1);
+        _pH = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 2);
+        _ec = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 3);
+    }
+
+}

@@ -1,0 +1,9 @@
+{
+  "culture": "vi",
+  "texts": {
+    "Menu:Home": "Trang chủ",
+    "Welcome": "Chào mừng bạn",
+    "GoToDashboard": "Đi tới bảng điều khiển",
+    "LongWelcomeMessage": "Chào mừng bạn đến ứng dụng. Đây là hệ thống IoT phục vụ cho nông nghiệp, người dùng có thể theo dõi thông số, điều khiển thiết bị thông qua Web UI và Internet."
+  }
+}

@@ -1,0 +1,6 @@
+@Acme.Greenhouse.MqttBroker_HostAddress = http://localhost:5206
+
+GET {{Acme.Greenhouse.MqttBroker_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

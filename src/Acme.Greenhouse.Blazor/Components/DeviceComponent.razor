@@ -1,0 +1,160 @@
+﻿
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Devices
+@using MQTTnet.Client
+@using System.Text.RegularExpressions
+@using System.Text
+@using MQTTnet.Extensions.ManagedClient
+
+@inject IManagedMqttClient MqttService
+@inherits GreenhouseComponentBase
+@if (Detail)
+{
+    <FluentAccordionItem>
+        <HeadingTemplate>
+            <div class="h5">@Device.Device.Name</div>
+        </HeadingTemplate>
+        <ChildContent>
+            <div slot="end">
+                @if (Device.IsOn)
+                {
+                    @switch (Device.Device.DeviceType)
+                    {
+                        case DeviceType.Fan:
+                            <img src="/images/fan.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        case DeviceType.Light:
+                            <img src="/images/light.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        case DeviceType.WaterPump:
+                            <img src="/images/water.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        default:
+                            <img src="/images/on.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                    }
+                }
+                else
+                {
+                    @switch (Device.Device.DeviceType)
+                    {
+                        case DeviceType.Fan:
+                            <img src="/images/fan-off.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        case DeviceType.Light:
+                            <img src="/images/light-off.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        case DeviceType.WaterPump:
+                            <img src="/images/water-off.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                        default:
+                            <img src="/images/off.svg" class="img-fluid  m-2" style="max-height: 35px" />
+                            break;
+                    }
+                }
+            </div>
+            <div class="d-flex justify-content-end">
+                <div class="text-black-50">
+                    ID: @Device.Device.Id
+                </div>
+                <div class="text-black-50">
+                    @Device.Device.Description
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                @if (Device.IsOn)
+                {
+                    <div class="text-success h6">
+                        Current: On
+                    </div>
+                }
+                else
+                {
+                    <div class="text-dark h6">
+                        Current: Off
+                    </div>
+                }
+            </div>
+            <div class="d-flex justify-content-center mt-2">
+                <FluentButton Loading="@Loading" Style="width: 30%" Appearance="Appearance.Accent" OnClick="BtnClick">
+                    @(Device.IsOn ? "Turn off" : "Turn on")
+                </FluentButton>
+            </div>
+
+        </ChildContent>
+    </FluentAccordionItem>
+}
+else
+{
+    <div class="row p-2 d-flex align-items-center">
+        <div class="col-8 text-center">
+            <div style="margin-left:-1em">@Device.Device.Name</div>
+        </div>
+        <div class="col ms-2">
+            @if (Device.IsOn)
+            {
+                <FluentIcon Value="@(new Icons.Filled.Size12.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Success" />
+            }
+            else
+            {
+                <FluentIcon Value="@(new Icons.Filled.Size12.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Disabled" />
+            }
+        </div>
+
+    </div>
+}
+
+@code {
+    [Parameter]
+    public DeviceViewModel Device { get; set; }
+    public bool Loading { get; set; }
+    [Parameter]
+    public bool Detail { get; set; }
+    [Parameter]
+    public Action<DeviceViewModel>? TurnOn { get; set; }
+    [Parameter]
+    public Action<DeviceViewModel>? TurnOff { get; set; }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        MqttService.ApplicationMessageReceivedAsync -= OnDeviceStatusMessageReceived;
+        MqttService.ApplicationMessageReceivedAsync += OnDeviceStatusMessageReceived;
+    }
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        MqttService.ApplicationMessageReceivedAsync -= OnDeviceStatusMessageReceived;
+    }
+    private async Task OnDeviceStatusMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+    {
+        int deviceId;
+        var topic = e.ApplicationMessage.Topic;
+        // device-status/{deviceId}/
+        Regex regex = new(@"device-status\/([a-f,0-9,-]+)\/");
+        var match = regex.Match(topic);
+        if (match.Success)
+        {
+            deviceId = int.Parse(match.Groups[1].Value);
+            if (deviceId == Device.Device.Id)
+            {
+                var status = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                Device.IsOn = status == "1";
+                Loading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+    private void BtnClick()
+    {
+        Loading = true;
+        if (Device.IsOn)
+        {
+            TurnOff?.Invoke(Device);
+        }
+        else
+        {
+            TurnOn?.Invoke(Device);
+        }
+
+    }
+}

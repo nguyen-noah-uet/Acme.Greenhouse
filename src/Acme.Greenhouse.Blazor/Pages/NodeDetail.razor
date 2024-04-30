@@ -1,0 +1,270 @@
+﻿@page "/node-detail/{NodeId}"
+@using Acme.Greenhouse.Blazor.Components
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Nodes
+@using Microsoft.Extensions.Logging
+@using Microsoft.FluentUI.AspNetCore.Components.DesignTokens
+@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@inject INodeService NodeService
+@inject ISensorService SensorService
+@inject IDeviceService DeviceService
+@inject ISensorDataService SensorDataService
+
+@attribute [StreamRendering(true)]
+@attribute [Authorize]
+@rendermode RenderMode.InteractiveServer
+@inject IToastService ToastService
+@inject FillColor FillColor
+@inject BaseLayerLuminance BaseLayerLuminance
+@inherits GreenhouseComponentBase
+
+<div class="container">
+    @if (!Loaded)
+    {
+        <div class="text-center h2">Loading...</div>
+    }
+    else
+    {
+        @if (Node is null)
+        {
+            <div class="text-center h2">404 NotFound</div>
+            return;
+        }
+
+        <FluentToolbar id="toolbar-fluent-components" @ref="Toolbar" Style="width: 100%">
+            <FluentSelect TOption="string" ValueChanged="OptionChanged">
+                <FluentOption Value="Item 1" Selected="true">1 hour ago</FluentOption>
+                <FluentOption Value="Item 1">2 hour ago</FluentOption>
+                <FluentOption Value="Item 1">6 hour ago</FluentOption>
+                <FluentOption Value="Item 1">12 hour ago</FluentOption>
+                <FluentOption Value="Item 2">1 day ago</FluentOption>
+            </FluentSelect>
+            <FluentCheckbox @bind-Value=@_isCustomTime>Custom</FluentCheckbox>
+            @if (_isCustomTime)
+            {
+                <FluentDatePicker Label="From" Value="FromDate" ValueChanged="@(e => FromDate = e.GetValueOrDefault())"/>
+                <FluentDatePicker Label="To" Value="ToDate" ValueChanged="@(e => ToDate = e.GetValueOrDefault())"/>
+                <FluentButton Appearance="Appearance.Accent" OnClick="ApplyCustomTime">Apply</FluentButton>
+            }
+            else
+            {
+                <FluentCheckbox>Realtime</FluentCheckbox>
+            }
+            <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.ArrowExport())" OnClick="ExportToExcel" slot="end">
+                Export
+                <FluentBadge slot="end">Preview</FluentBadge>
+            </FluentButton>
+        </FluentToolbar>
+        <div class="text-center h2 mb-4">@Node.Name</div>
+        <div class="align-content-center text-center">
+
+
+        </div>
+        @if (_isCustomTime)
+        {
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="h4">
+                        <span>From</span>
+                    </div>
+
+                    @* <FluentTimePicker Value="FromTime" ValueChanged="@(e => FromTime = e.GetValueOrDefault())" /> *@
+                </div>
+                <div class="col-md-6">
+                    <div class="h4">
+                        <span>To</span>
+                    </div>
+
+                    @* <FluentTimePicker Value="ToTime" ValueChanged="@(e => ToTime = e.GetValueOrDefault())" /> *@
+                </div>
+            </div>
+        }
+
+        <div>
+            @if (NodeViewModel != null)
+            {
+                if (NodeViewModel.Sensors != null)
+                {
+                    foreach (var sensor in NodeViewModel.Sensors)
+                    {
+                        <SensorStatComponent Sensor="sensor"/>
+                    }
+                }
+            }
+            else
+            {
+                <div>No data</div>
+            }
+
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string NodeId { get; set; } = default!;
+    FluentToolbar? Toolbar;
+    private DateTime _fromDate = DateTime.Now.AddDays(-1);
+
+    private DateTime FromDate
+    {
+        get => _fromDate;
+        set
+        {
+            _fromDate = value;
+            GetData().Wait();
+        }
+    }
+
+    private DateTime _fromTime = DateTime.Now;
+
+    private DateTime FromTime
+    {
+        get => _fromTime;
+        set
+        {
+            _fromTime = value;
+            GetData().Wait();
+        }
+    }
+
+    private DateTime _toDate = DateTime.Now;
+
+    private DateTime ToDate
+    {
+        get => _toDate;
+        set
+        {
+            _toDate = value;
+            GetData().Wait();
+        }
+    }
+
+    private DateTime _toTime = DateTime.Now;
+
+    private DateTime ToTime
+    {
+        get => _toTime;
+        set
+        {
+            _toTime = value;
+            GetData().Wait();
+        }
+    }
+
+    public NodeDto? Node { get; set; }
+    public NodeViewModel? NodeViewModel { get; set; }
+    public bool Loaded { get; set; }
+    private string _selectedOption;
+    private bool _isCustomTime;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!int.TryParse(NodeId, out var nodeId))
+            return;
+        try
+        {
+            await InvokeAsync(() => { Loaded = false; });
+            Node = await NodeService.GetAsync(nodeId);
+            await GetData(DateTime.Now.AddHours(-1), DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(() =>
+            {
+                Loaded = true;
+                StateHasChanged();
+            });
+        }
+    }
+
+    private async Task GetData(DateTime? from = null, DateTime? to = null)
+    {
+        await InvokeAsync(() =>
+        {
+            Loaded = false;
+            StateHasChanged();
+        });
+        var now = DateTime.Now;
+        if (from is null || to is null)
+        {
+            from = new DateTime(FromDate.Year, FromDate.Month, FromDate.Day, 0, 0, 0);
+            to = new DateTime(ToDate.Year, ToDate.Month, ToDate.Day, 0, 0, 0);
+        }
+
+        NodeViewModel = new NodeViewModel()
+        {
+            Node = Node!,
+            Sensors = (await SensorService.GetByNodeId(Node!.Id)).Select(x => new SensorViewModel()
+            {
+                Sensor = x,
+                Data = SensorDataService.GetByDate(x.Id, from.Value, to.Value).Result
+            }).ToList(),
+            Devices = (await DeviceService.GetByNodeId(Node.Id)).Select(x => new DeviceViewModel()
+            {
+                Device = x
+            }).ToList()
+        };
+        await InvokeAsync(() =>
+        {
+            Loaded = true;
+            StateHasChanged();
+        });
+    }
+
+    private async Task ApplyCustomTime()
+    {
+        try
+        {
+            var from = new DateTime(FromDate.Year, FromDate.Month, FromDate.Day, 0, 0, 0);
+            var to = new DateTime(ToDate.Year, ToDate.Month, ToDate.Day, 0, 0, 0);
+            await GetData(from, to);
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError(title: "Error", timeout: 2000);
+            Logger.LogError(e.Message);
+        }
+    }
+
+    private async Task BtnRefreshClick()
+    {
+        await GetData();
+    }
+
+
+    private async Task OptionChanged(string? arg)
+    {
+        if (arg is null)
+            return;
+        _selectedOption = arg;
+        var now = DateTime.Now;
+        switch (arg)
+        {
+            case "Item 1":
+                await GetData(now.AddHours(-1), now);
+                break;
+            case "Item 2":
+                await GetData(now.AddHours(-2), now);
+                break;
+            case "Item 3":
+                await GetData(now.AddHours(-6), now);
+                break;
+            case "Item 4":
+                await GetData(now.AddHours(-12), now);
+                break;
+            case "Item 5":
+                await GetData(now.AddHours(-24), now);
+                break;
+        }
+    }
+
+    private async Task ExportToExcel()
+    {
+        ToastService.ShowDownload(title: "Not work yet", timeout: 2000);
+    }
+
+}

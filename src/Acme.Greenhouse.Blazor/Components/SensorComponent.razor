@@ -1,0 +1,122 @@
+﻿
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Sensors
+@using MQTTnet.Client
+@using System.Text.RegularExpressions
+@using System.Text
+@using Acme.Greenhouse.Extensions
+@using MQTTnet.Extensions.ManagedClient
+@using Microsoft.Extensions.Logging
+@inject IManagedMqttClient MqttService
+@inject ILogger<SensorComponent> Logger
+@inherits GreenhouseComponentBase
+@if (Detail)
+{
+    <FluentAccordionItem>
+        <HeadingTemplate>
+            <div class="h5">
+                <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("#.#")) @Sensor.Sensor.Unit</span></div>
+            </div>
+        </HeadingTemplate>
+        <ChildContent>
+            <div slot="end">
+                @switch (Sensor.Sensor.SensorType)
+                {
+                    case SensorType.SoilMoisture:
+                        <img src="/images/soil-moisture.svg" class="img-fluid m-1" style="max-height: 35px" />
+                        break;
+                    case SensorType.Temperature:
+                        <img src="/images/temperature.svg" class="img-fluid m-1" style="max-height: 35px" />
+                        break;
+                    case SensorType.Humidity:
+                        <img src="/images/humidity.svg" class="img-fluid m-1" style="max-height: 35px" />
+                        break;
+                    case SensorType.Ph:
+                        <img src="/images/ph-sensor.svg" class="img-fluid m-1" style="max-height: 35px" />
+                        break;
+                    case SensorType.Ec:
+                        <img src="/images/ec-sensor.svg" class="img-fluid m-1" style="max-height: 35px" />
+                        break;
+
+                    default:
+                        break;
+                }
+
+            </div>
+            <div class="d-flex justify-content-end">
+                <div class="text-black-50">
+                    ID: @Sensor.Sensor.Id
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <div class="h6">
+                    Current: @(Sensor.CurrentValue.ToString("#.#"))
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <div class="h6">
+                    Unit: @Sensor.Sensor.Unit
+                </div>
+            </div>
+
+        </ChildContent>
+    </FluentAccordionItem>
+}
+else
+{
+    <div class="text-center">
+        <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("#.#")) @Sensor.Sensor.Unit</span></div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public SensorViewModel Sensor { get; set; }
+    private string color = "transparent";
+    [Parameter]
+    public bool Detail { get; set; }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        MqttService.ApplicationMessageReceivedAsync -= (OnSensorMessageReceived);
+        MqttService.ApplicationMessageReceivedAsync += (OnSensorMessageReceived);
+
+    }
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        MqttService.ApplicationMessageReceivedAsync -= (OnSensorMessageReceived);
+    }
+    private async Task OnSensorMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+    {
+        int sensorId;
+        var topic = e.ApplicationMessage.Topic;
+        // device-status/{deviceId}/
+        Regex regex = new(@"sensors\/([a-f,0-9,-]+)\/");
+
+        var match = regex.Match(topic);
+        if (match.Success)
+        {
+            //Logger.LogInformation("{topic}:{payload}", topic, e.ApplicationMessage.PayloadSegment);
+            sensorId = int.Parse(match.Groups[1].Value);
+            if (sensorId == Sensor.Sensor.Id)
+            {
+                var payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                if (double.TryParse(payload, out double value))
+                {
+                    Sensor.CurrentValue = sensorId == 1 ? value.Smooth() : value;
+                    await HighLight();
+                }
+            }
+        }
+    }
+    private async Task HighLight()
+    {
+
+        color = "#91c891";
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(400);
+        color = "transparent";
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -1,0 +1,76 @@
+﻿<FluentWizard Id="customized-wizard"
+              @bind-Value="@Value"
+              StepTitleHiddenWhen="@GridItemHidden.XsAndDown"
+              Height="300px">
+    <Steps>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 1: Read sensor data
+                </div>
+            </StepTemplate>
+            <ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 1: Read sensor data </FluentLabel>
+                Microprocessors (i.e. ESP32, ESP8266) read environmental parameters through sensors such as: soil moisture sensor, pH sensor, EC sensor.
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 2: Publish sensor data
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 2: Publish sensor data</FluentLabel>
+                The received sensor values will be published by the microprocessors to the MQTT broker via Wi-fi connection and MQTT protocol.
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 3: Update UI/Save data
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 3: Update UI/Save data</FluentLabel>
+                The web server listens for sensor data published to the MQTT broker. Once the message is published to the MQTT broker, the Web server updates the UI and saves the received value to the database.
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 4: Go to step 1
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 4: Go to step 1</FluentLabel>
+                Go to step 1
+            </ChildContent>
+        </FluentWizardStep>
+    </Steps>
+
+    <ButtonTemplate>
+        @{
+            var index = context;
+            var lastStepIndex = 3;
+
+            <div>
+                @if (index > 0)
+                {
+                    <FluentButton OnClick="@(() => Value = 0)">&lt;&lt;</FluentButton>
+                    <FluentButton OnClick="@(() => Value -= 1)">&lt;</FluentButton>
+                }
+            </div>
+            <FluentSpacer />
+            <div>
+                @if (index != lastStepIndex)
+                {
+                    <FluentButton OnClick="@(() => Value += 1)" Appearance="Appearance.Accent">&gt;</FluentButton>
+                    <FluentButton OnClick="@(() => Value = lastStepIndex)" Appearance="Appearance.Accent">&gt;&gt;</FluentButton>
+                }
+            </div>
+        }
+    </ButtonTemplate>
+</FluentWizard>
+
+
+@code {
+    int Value = 0;
+}

@@ -1,0 +1,87 @@
+﻿<FluentWizard Id="customized-wizard"
+              @bind-Value="@Value"
+              StepTitleHiddenWhen="@GridItemHidden.XsAndDown"
+              Height="300px">
+    <Steps>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 1: User control device remotely
+                </div>
+            </StepTemplate>
+            <ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 1: Users control device remotely</FluentLabel>
+                Users can click on buttons displayed on the Web UI to remotely control the device (for example, turn on the pump).
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 2: Publish device control command
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 2: Publish sensor data</FluentLabel>
+                The web server publishes device control commands to the MQTT broker
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 3: Execute command
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 3: Execute command</FluentLabel>
+                The microprocessor listens to control signals from the MQTT broker. Once the command message is published to the MQTT broker, the processor executes the command (for example, turns on the pump).
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 4: Publish device status
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 4: Publish device status</FluentLabel>
+                After executing the command, the processor will publish the device status to the MQTT broker.
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div active="@context.Active">
+                    Step 5: Update UI/Save data
+                </div>
+            </StepTemplate><ChildContent>
+                <FluentLabel Typo="Typography.Header">Step 5: Publish device status</FluentLabel>
+                The web server listens for device status data published to the MQTT broker. Once the message is published to the MQTT broker, the Web server updates the UI and saves the device state to the database.
+            </ChildContent>
+        </FluentWizardStep>
+    </Steps>
+
+    <ButtonTemplate>
+        @{
+            var index = context;
+            var lastStepIndex = 4;
+
+            <div>
+                @if (index > 0)
+
+                {
+                    <FluentButton OnClick="@(() => Value = 0)">&lt;&lt;</FluentButton>
+                    <FluentButton OnClick="@(() => Value -= 1)">&lt;</FluentButton>
+                }
+            </div>
+            <FluentSpacer />
+            <div>
+                @if (index != lastStepIndex)
+                {
+                    <FluentButton OnClick="@(() => Value += 1)" Appearance="Appearance.Accent">&gt;</FluentButton>
+                    <FluentButton OnClick="@(() => Value = lastStepIndex)" Appearance="Appearance.Accent">&gt;&gt;</FluentButton>
+                }
+            </div>
+        }
+    </ButtonTemplate>
+</FluentWizard>
+
+
+@code {
+    int Value = 0;
+}

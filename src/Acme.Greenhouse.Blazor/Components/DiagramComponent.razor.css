@@ -1,0 +1,76 @@
+﻿#diagram {
+    min-width: 650px;
+    aspect-ratio: 1350 / 555;
+    background-image: url('images/Diagram-4.svg');
+    background-repeat: no-repeat;
+    background-attachment: inherit;
+    background-size: 100% 100%;
+}
+
+.DiagramMarker {
+    position: absolute !important;
+    background-color: transparent;
+    cursor: pointer
+}
+#flowchart {
+    left: 85% !important;
+    top: 10% !important;
+}
+#IC1 {
+    left: 0% !important;
+    top: 32.25% !important;
+    width: 9.26%;
+    height: 18.02%;
+}
+
+#IC2 {
+    left: 33.26% !important;
+    top: 70.10% !important;
+    width: 9.26%;
+    height: 18.02%;
+}
+
+#IC3 {
+    left: 70.44% !important;
+    top: 67.02% !important;
+    width: 9.26%;
+    height: 18.02%;
+}
+
+#Broker {
+    left: 41.55% !important;
+    top: 0% !important;
+    width: 20.74% !important;
+    height: 17.2% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#pump1{
+    left: 17.2% !important;
+    top: 27.07% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#pump2{
+    left: 17.2% !important;
+    top: 35.5% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#pump3{
+    left: 17.2% !important;
+    top: 44.85% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#soil-moisture-value{
+    left: 36.1% !important;
+    top: 99% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#ph-value{
+    left: 79.6% !important;
+    top: 97% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
+#ec-value{
+    left: 66.78% !important;
+    top: 98% !important;
+    background-color: rgba(0, 150, 50, 0.3);
+}
