@@ -1,0 +1,6 @@
+﻿services:
+  acme.greenhouse.blazor:
+    image: acme.greenhouse.blazor
+    build:
+      context: .
+      dockerfile: src/Acme.Greenhouse.Blazor/Dockerfile
