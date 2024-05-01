@@ -4,3 +4,8 @@
     build:
       context: .
       dockerfile: src/Acme.Greenhouse.Blazor/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - 80:8080
