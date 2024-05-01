@@ -1,5 +1,4 @@
-﻿FROM node:latest
-RUN npm install --global yarn
+﻿
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
@@ -18,9 +17,14 @@ COPY ["src/Acme.Greenhouse.HttpApi/Acme.Greenhouse.HttpApi.csproj", "src/Acme.Gr
 COPY ["src/Acme.Greenhouse.EntityFrameworkCore/Acme.Greenhouse.EntityFrameworkCore.csproj", "src/Acme.Greenhouse.EntityFrameworkCore/"]
 RUN dotnet restore "src/Acme.Greenhouse.Blazor/Acme.Greenhouse.Blazor.csproj"
 COPY . .
+
+FROM node:latest
+RUN npm install --global yarn
+WORKDIR "/src/src/Acme.Greenhouse.Blazor"
+RUN yarn install
+
 WORKDIR "/src/src/Acme.Greenhouse.Blazor"
 RUN dotnet tool install -g Volo.Abp.Cli
-RUN abp install-libs
 
 RUN dotnet build "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
