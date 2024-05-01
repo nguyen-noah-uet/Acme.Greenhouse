@@ -43,6 +43,8 @@ namespace Acme.Greenhouse.Data
             if (await nodeRepo.GetCountAsync() == 0)
             {
                 logger.LogInformation("Seeding nodes data");
+                #if FALSE
+                // For GreenhouseDb
                 // seed 3 nodes
                 var controlNode = await nodeRepo.InsertAsync(new Node() { Name = "Control", Description = "Node for control pump relays" }, autoSave:true);
                 var sensorNode1 = await nodeRepo.InsertAsync(new Node() { Name = "Sensors 1", Description = "Node for soil moisture sensor" }, autoSave: true);
@@ -60,6 +62,24 @@ namespace Acme.Greenhouse.Data
                 var phSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "pH", SensorType = SensorType.Ph, LowThreshold = 6.0, HighThreshold = 6.5, NodeId = sensorNode2.Id }, autoSave: true);
                 var ecSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "EC", SensorType = SensorType.Ec, Unit = "µS/cm", LowThreshold = 200.0, HighThreshold = 700.0, NodeId = sensorNode2.Id }, autoSave: true);
                 logger.LogInformation("Data inserted.");
+                #else
+                // For SmarthomeDb
+                // seed 2 nodes (rooms)
+                var room1 = await nodeRepo.InsertAsync(new Node() { Name = "Room 1" }, autoSave:true);
+                var gasSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Gas", SensorType = SensorType.Gas, LowThreshold = 0, HighThreshold = 1000, NodeId = room1.Id }, autoSave: true);
+                var fireSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Fire", SensorType = SensorType.Fire, LowThreshold = 0, HighThreshold = 1000, NodeId = room1.Id }, autoSave: true);
+                var lightRoom1 = await deviceRepo.InsertAsync(new Device() { Name = "Light", DeviceType = DeviceType.Relay, NodeId = room1.Id }, autoSave: true);
+                var fanRoom1 = await deviceRepo.InsertAsync(new Device() { Name = "Fan", DeviceType = DeviceType.Relay, NodeId = room1.Id }, autoSave: true);
+                
+                var room2 = await nodeRepo.InsertAsync(new Node() { Name = "Room 2" }, autoSave: true);
+                var temperatureSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Temperature", SensorType = SensorType.Temperature, Unit = "\u00b0C", LowThreshold = 0, HighThreshold = 1000, NodeId = room2.Id }, autoSave: true);
+                var humiditySensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Humidity", SensorType = SensorType.Humidity, Unit = "%", LowThreshold = 0, HighThreshold = 1000, NodeId = room2.Id }, autoSave: true);
+                var lightRoom2 = await deviceRepo.InsertAsync(new Device() { Name = "Light", DeviceType = DeviceType.Relay, NodeId = room2.Id }, autoSave: true);
+                var fanRoom2 = await deviceRepo.InsertAsync(new Device() { Name = "Fan", DeviceType = DeviceType.Relay, NodeId = room2.Id }, autoSave: true);
+
+                logger.LogInformation("Data inserted.");
+                #endif
+                
             }
         }
     }

@@ -22,100 +22,106 @@
 @inject IJSRuntime JsRuntime
 <div style="margin: 25px 25px 25px 25px !important;">
     <div class="mb-2">
-        <FluentDesignSystemProvider AccentBaseColor="#009900">
-            @if (!Loaded)
-            {
-                <div class="d-flex justify-content-center text-center">
-                    <div>
-                        <FluentProgressRing Color="@OfficeColor.Excel.ToAttributeValue()" Width="500"></FluentProgressRing>
+        @if (!Loaded)
+        {
+        <div class="d-flex justify-content-center text-center">
+            <div>
+                <FluentProgressRing Color="@OfficeColor.Excel.ToAttributeValue()" Width="500"></FluentProgressRing>
+            </div>
+        </div>
+        }
+        else
+        {
+        <div class="row justify-content-md-center">
+            <div class="col-lg-4">
+                <div class="card m-0">
+                    <div class="card-header">
+                        <div class="h5">Dashboard</div>
+                    </div>
+                    <div class="card-body">
+                        <FluentAccordion>
+                            @foreach (var node in _nodes)
+                            {
+                            <FluentAccordionItem Expanded="true">
+                                <HeadingTemplate>
+                                    <div class="h5 text-black">@node.Node.Name</div>
+                                    <div class="text-black-50">
+                                        @node.Node.Description
+                                    </div>
+                                </HeadingTemplate>
+                                <ChildContent>
+                                    <div slot="end">
+                                        @if (node.IsOnline)
+                                        {
+                                        <FluentIcon Value="@(new Icons.Filled.Size20.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Success" />
+                                        }
+                                        else
+                                        {
+                                        <FluentIcon Value="@(new Icons.Regular.Size20.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Disabled" />
+                                        }
+                                    </div>
+                                    <div class="d-flex flex-row-reverse">
+                                        <FluentButton Class="mb-1" IconStart="@(new Icons.Regular.Size20.Link())" OnClick="@(_ => JsRuntime.InvokeVoidAsync("open", $"/node-detail/{node.Node.Id}", "_blank") )">Detail</FluentButton>
+                                    </div>
+                                    <div>
+                                        @if (node.Devices is not null && node.Devices.Count > 0)
+                                        {
+                                        <FluentAccordion>
+                                            @* <div class="d-flex justify-content-between"> *@
+                                            @*     <div> *@
+                                            @*         <FluentSwitch @bind-Value="AutoMode" ReadOnly="true" Label="Auto mode" CheckedMessage="On" UncheckedMessage="Off"></FluentSwitch> *@
+                                            @*     </div> *@
+                                            @*     <div> *@
+                                            @*         <FluentButton Appearance="Appearance.Neutral" Style="width: 45%" OnClick="ToggleNodeMode">@(AutoMode ? "Switch to manual mode" : "Switch to auto mode")</FluentButton> *@
+                                            @*     </div> *@
+                                            @* </div> *@
+
+                                            @foreach (var device in node.Devices)
+                                            {
+                                            <DeviceComponent Device="@device" Detail="true" TurnOn="TurnOnDevice" TurnOff="TurnOffDevice"/>
+                                            }
+                                        </FluentAccordion>
+                                        }
+                                        @if (node.Sensors is not null && node.Sensors.Count > 0)
+                                        {
+                                        <FluentAccordion>
+                                            @foreach (var sensor in node.Sensors)
+                                            {
+                                            <SensorComponent Sensor="@sensor" Detail="true" />
+                                            }
+                                        </FluentAccordion>
+                                        }
+                                    </div>
+
+                                </ChildContent>
+                            </FluentAccordionItem>
+
+                            }
+                        </FluentAccordion>
+
                     </div>
                 </div>
-            }
-            else
-            {
-                <div class="row justify-content-md-center">
-                    <div class="col-lg-4">
-                        <div class="card m-0">
-                            <div class="card-header">
-                                <div class="h5">Dashboard</div>
-                            </div>
-                            <div class="card-body">
-                                <FluentAccordion>
-                                    @foreach (var node in _nodes)
-                                    {
-                                        <FluentAccordionItem Expanded="true">
-                                            <HeadingTemplate>
-                                                <div class="h5 text-black">@node.Node.Name</div>
-                                                <div class="text-black-50">
-                                                    @node.Node.Description
-                                                </div>
-                                            </HeadingTemplate>
-                                            <ChildContent>
-                                                <div slot="end">
-                                                    @if (node.IsOnline)
-                                                    {
-                                                        <FluentIcon Value="@(new Icons.Filled.Size20.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Success" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <FluentIcon Value="@(new Icons.Regular.Size20.Circle())" Color="Microsoft.FluentUI.AspNetCore.Components.Color.Disabled" />
-                                                    }
-                                                </div>
-                                                <div class="d-flex flex-row-reverse">
-                                                    <FluentButton Class="mb-1" IconStart="@(new Icons.Regular.Size20.Link())" OnClick="@(_ => JsRuntime.InvokeVoidAsync("open", $"/node-detail/{node.Node.Id}", "_blank") )">Detail</FluentButton>
-                                                </div>
-                                                <div>
-                                                    @if (node.Devices is not null && node.Devices.Count > 0)
-                                                    {
-                                                        <FluentAccordion>
-                                                            <div class="d-flex justify-content-between">
-                                                                <div>
-                                                                    <FluentSwitch @bind-Value="AutoMode" ReadOnly="true" Label="Auto mode" CheckedMessage="On" UncheckedMessage="Off"></FluentSwitch>
-                                                                </div>
-                                                                <div>
-                                                                    <FluentButton Appearance="Appearance.Neutral" Style="width: 45%" OnClick="ToggleNodeMode">@(AutoMode ? "Switch to manual mode" : "Switch to auto mode")</FluentButton>
-                                                                </div>
-                                                            </div>
-
-                                                            @foreach (var device in node.Devices)
-                                                            {
-                                                                <DeviceComponent Device="@device" Detail="true" TurnOn="TurnOnDevice" TurnOff="TurnOffDevice"/>
-                                                            }
-                                                        </FluentAccordion>
-                                                    }
-                                                    @if (node.Sensors is not null && node.Sensors.Count > 0)
-                                                    {
-                                                        <FluentAccordion>
-                                                            @foreach (var sensor in node.Sensors)
-                                                            {
-                                                                <SensorComponent Sensor="@sensor" Detail="true" />
-                                                            }
-                                                        </FluentAccordion>
-                                                    }
-                                                </div>
-                                                
-                                            </ChildContent>
-                                        </FluentAccordionItem>
-
-                                    }
-                                </FluentAccordion>
-
+            </div>
+            <div class="col-lg-8 border-start">
+                <div class="card m-0 p-1 w-100">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between">
+                            <div class="h5">Diagram</div>
+                            <div>
+                                @* <FluentButton Appearance="Appearance.Accent" OnClick="OpenDialogAsync">Flowchart</FluentButton> *@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-8 border-start">
-                        <div class="card m-0 p-1 w-100">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between">
-                                    <div class="h5">Diagram</div>
-                                    <div>
-                                        <FluentButton Appearance="Appearance.Accent" OnClick="OpenDialogAsync">Flowchart</FluentButton>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <DiagramComponent/>
-                                @*<FluentCard class="diagram align-middle m-1">
+                    <div class="card-body">
+                        @if (true)
+                        {
+                        <img src="https://picsum.photos/seed/picsum/1350/555" alt="diagram"/>
+                        }
+                        else
+                        {
+                        <DiagramComponent/>
+                        }
+                        @*<FluentCard class="diagram align-middle m-1">
                             <img src="/images/grass.png" class="img-fluid" />
 
                             @for (int i = 0; i < Nodes.Count; i++)
@@ -149,37 +155,35 @@
                             </div>
                             }
                             </FluentCard>*@
-                            </div>
-                        </div>
-                        <div class="card m-0 mt-1 p-1 w-100">
-                            <div class="card-header">
-                                <div class="h5">History</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="mt-0">
-                                    <FluentToolbar id="toolbar-fluent-components-two" style="width:100%" @ref=Toolbar>
-                                        <FluentSearch @bind-Value="@_searchValue" @bind-Value:after=HandleSearchInput Placeholder="Search" />
-                                        <FluentStack Orientation="Orientation.Horizontal" slot="end">
-                                            <FluentButton IconStart="@(new Icons.Regular.Size20.ArrowSync())" OnClick="RefreshLog"></FluentButton>
-                                            <FluentButton IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="ClearLog"></FluentButton>
-                                        </FluentStack>
-                                    </FluentToolbar>
-                                </div>
-                                <div id="log-area" class="pt-2" style="min-height: 180px;max-height: 180px;overflow: auto; color:white; background-color:#272727;font-family:Consolas,ui-monospace">
-                                    @foreach (var log in _logs)
-                                    {
-                                        <div class="ms-2">@log</div>
-                                    }
-                                </div>
-                                
-                            </div>
-                        </div>
                     </div>
                 </div>
+                <div class="card m-0 mt-1 p-1 w-100">
+                    <div class="card-header">
+                        <div class="h5">History</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mt-0">
+                            <FluentToolbar id="toolbar-fluent-components-two" style="width:100%" @ref=Toolbar>
+                                <FluentSearch @bind-Value="@_searchValue" @bind-Value:after=HandleSearchInput Placeholder="Search" />
+                                <FluentStack Orientation="Orientation.Horizontal" slot="end">
+                                    <FluentButton IconStart="@(new Icons.Regular.Size20.ArrowSync())" OnClick="RefreshLog"></FluentButton>
+                                    <FluentButton IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="ClearLog"></FluentButton>
+                                </FluentStack>
+                            </FluentToolbar>
+                        </div>
+                        <div id="log-area" class="pt-2" style="min-height: 180px;max-height: 180px;overflow: auto; color:white; background-color:#272727;font-family:Consolas,ui-monospace">
+                            @foreach (var log in _logs)
+                            {
+                            <div class="ms-2">@log</div>
+                            }
+                        </div>
 
-            }
-        </FluentDesignSystemProvider>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        }
     </div>
 </div>
 <script>

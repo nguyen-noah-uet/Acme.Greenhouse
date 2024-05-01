@@ -5,6 +5,7 @@ using Acme.Greenhouse.Blazor.Middlewares;
 using Acme.Greenhouse.Data;
 using Autofac.Core;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -57,7 +58,7 @@ public class Program
             {
                 Log.Information("Connecting to MQTT broker.");
                 var mqttClientOptions = new MqttClientOptionsBuilder()
-                    .WithTcpServer(builder.Configuration["Mqtt:Server"])
+                    .WithTcpServer(builder.Configuration["Mqtt:Server"], builder.Configuration.GetValue<int?>("Mqtt:Port"))
                     .WithCredentials(builder.Configuration["Mqtt:User"], builder.Configuration["Mqtt:Password"])
                     .WithCleanSession()
                     .WithTimeout(TimeSpan.FromSeconds(15))
@@ -83,13 +84,22 @@ public class Program
                     return Task.CompletedTask;
                 };
                 client.StartAsync(managedMqttClientOptions).Wait();
-                client.SubscribeAsync("sensors/#").Wait();
-                client.SubscribeAsync("command/#").Wait();
-                client.SubscribeAsync("node-status/#").Wait();
-                client.SubscribeAsync("device-status/#").Wait();
-                client.SubscribeAsync("mode-node/#").Wait();
-
-
+                var subscribeTopics = builder.Configuration.GetValue<List<string>?>("Mqtt:SubscribeTopics");
+                if (subscribeTopics != null)
+                {
+                    foreach (var topic in subscribeTopics)
+                    {
+                        client.SubscribeAsync(topic).Wait();
+                    }   
+                }
+                else
+                {
+                    client.SubscribeAsync("sensors/#").Wait();
+                    client.SubscribeAsync("command/#").Wait();
+                    client.SubscribeAsync("node-status/#").Wait();
+                    client.SubscribeAsync("device-status/#").Wait();
+                    client.SubscribeAsync("mode-node/#").Wait();
+                }
                 return client;
                     
             });

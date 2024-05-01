@@ -8,6 +8,8 @@
         Ph,
         Ec,
         WaterLevel,
-        Other
+        Gas,
+        Fire,
+        Other,
     }
 }

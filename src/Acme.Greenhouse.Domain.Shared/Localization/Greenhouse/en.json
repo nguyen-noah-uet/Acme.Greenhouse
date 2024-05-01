@@ -4,6 +4,6 @@
     "Menu:Home": "Home",
     "Welcome": "Welcome",
     "GoToDashboard": "Go to dashboard",
-    "LongWelcomeMessage": "Welcome to the application. This is an IoT service system for agriculture, users can monitor parameters and control equipment via Web UI and the Internet."
+    "LongWelcomeMessage": "Welcome to the application. This is an IoT service system for smart home, users can monitor parameters and control equipment via Web UI and the Internet."
   }
 }
