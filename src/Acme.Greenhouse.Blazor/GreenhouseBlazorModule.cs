@@ -84,18 +84,18 @@ public class GreenhouseBlazorModule : AbpModule
             });
         });
 
-        if (!hostingEnvironment.IsDevelopment())
-        {
-            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-            {
-                options.AddDevelopmentEncryptionAndSigningCertificate = false;
-            });
-
-            PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
-            {
-                serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", "772dcdf7-568f-45be-a9c8-85f2975962fe");
-            });
-        }
+        // if (!hostingEnvironment.IsDevelopment())
+        // {
+        //     PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+        //     {
+        //         options.AddDevelopmentEncryptionAndSigningCertificate = false;
+        //     });
+        //
+        //     PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
+        //     {
+        //         serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", "772dcdf7-568f-45be-a9c8-85f2975962fe");
+        //     });
+        // }
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
