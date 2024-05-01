@@ -2,5 +2,8 @@
 
 public partial class Index
 {
-
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/dashboard");
+    }
 }
