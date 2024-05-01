@@ -29,6 +29,7 @@ RUN dotnet tool install -g Volo.Abp.Cli
 RUN dotnet build "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
+WORKDIR "/src/src/Acme.Greenhouse.Blazor"
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
