@@ -18,6 +18,7 @@ COPY ["src/Acme.Greenhouse.EntityFrameworkCore/Acme.Greenhouse.EntityFrameworkCo
 RUN dotnet restore "src/Acme.Greenhouse.Blazor/Acme.Greenhouse.Blazor.csproj"
 COPY . .
 WORKDIR "/src/src/Acme.Greenhouse.Blazor"
+RUN apt-get update && apt-get install -y nodejs
 RUN dotnet tool install -g Volo.Abp.Cli
 RUN npm install --global yarn
 RUN abp install-libs
