@@ -25,7 +25,6 @@ RUN yarn install
 
 WORKDIR "/src/src/Acme.Greenhouse.Blazor"
 RUN dotnet tool install -g Volo.Abp.Cli
-RUN yarn install
 
 RUN dotnet build "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
