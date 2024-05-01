@@ -20,7 +20,7 @@ RUN dotnet restore "src/Acme.Greenhouse.Blazor/Acme.Greenhouse.Blazor.csproj"
 COPY . .
 WORKDIR "/src/src/Acme.Greenhouse.Blazor"
 RUN dotnet tool install -g Volo.Abp.Cli
-RUN abp install-libs
+RUN yarn install
 
 RUN dotnet build "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
