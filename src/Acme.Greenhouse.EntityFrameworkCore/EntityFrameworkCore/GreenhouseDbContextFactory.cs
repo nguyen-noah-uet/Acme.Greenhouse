@@ -17,7 +17,7 @@ public class GreenhouseDbContextFactory : IDesignTimeDbContextFactory<Greenhouse
         var configuration = BuildConfiguration();
 
         var builder = new DbContextOptionsBuilder<GreenhouseDbContext>()
-            .UseSqlServer(configuration.GetConnectionString("Default"));
+            .UseSqlServer(configuration.GetConnectionString("AzureDb"));
 
         return new GreenhouseDbContext(builder.Options);
     }
