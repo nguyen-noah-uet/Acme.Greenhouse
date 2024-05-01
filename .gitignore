@@ -261,5 +261,5 @@ src/Acme.Greenhouse.DbMigrator/Logs/*
 src/Acme.Greenhouse.Blazor/Logs/*
 src/Acme.Greenhouse.Blazor.Tiered/Logs/*
 
-# Use abp install-libs to restore.
-**/wwwroot/libs/*
+# Use abp install-libs to restore. Hoan: Inclide libs folder
+# **/wwwroot/libs/*
