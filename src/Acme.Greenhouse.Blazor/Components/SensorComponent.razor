@@ -104,7 +104,11 @@ else
                 var payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
                 if (double.TryParse(payload, out double value))
                 {
-                    Sensor.CurrentValue = sensorId == 1 ? value.Smooth() : value;
+                    Sensor.CurrentValue = value;
+                    // if (sensorId != 1)
+                    //     
+                    // else
+                    //     Sensor.CurrentValue = value.Smooth();
                     await HighLight();
                 }
             }

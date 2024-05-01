@@ -183,7 +183,7 @@
                     case "sensors/1/":
                         if (_soilMoisture != null)
                         {
-                            _soilMoisture.CurrentValue = double.Parse(payloadString).Smooth();;
+                            _soilMoisture.CurrentValue = double.Parse(payloadString);;
                             changed = true;
                         }
 

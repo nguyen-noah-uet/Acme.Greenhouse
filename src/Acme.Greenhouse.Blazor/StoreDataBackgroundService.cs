@@ -80,10 +80,10 @@ namespace Acme.Greenhouse.Blazor
                 {
                     int sensorId = int.Parse(sensorMatch.Groups[1].Value);
                     double sensorValue = double.Parse(payloadString);
-                    if (sensorId == 1)
-                    {
-                        sensorValue = sensorValue.Smooth();
-                    }
+                    // if (sensorId == 1)
+                    // {
+                    //     sensorValue = sensorValue.Smooth();
+                    // }
                     await InsertSensorData(sensorId, sensorValue);
                     return;
                 }
