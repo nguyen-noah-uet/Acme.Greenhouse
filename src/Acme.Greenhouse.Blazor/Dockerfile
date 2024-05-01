@@ -9,6 +9,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Acme.Greenhouse.Blazor/Acme.Greenhouse.Blazor.csproj", "src/Acme.Greenhouse.Blazor/"]
+COPY ["src/Acme.Greenhouse.Blazor/yarn.lock", "src/Acme.Greenhouse.Blazor/"]
+COPY ["src/Acme.Greenhouse.Blazor/package.json", "src/Acme.Greenhouse.Blazor/"]
 COPY ["src/Acme.Greenhouse.Application/Acme.Greenhouse.Application.csproj", "src/Acme.Greenhouse.Application/"]
 COPY ["src/Acme.Greenhouse.Domain/Acme.Greenhouse.Domain.csproj", "src/Acme.Greenhouse.Domain/"]
 COPY ["src/Acme.Greenhouse.Domain.Shared/Acme.Greenhouse.Domain.Shared.csproj", "src/Acme.Greenhouse.Domain.Shared/"]
