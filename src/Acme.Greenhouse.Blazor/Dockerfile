@@ -1,4 +1,5 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM node:latest
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -17,6 +18,10 @@ COPY ["src/Acme.Greenhouse.EntityFrameworkCore/Acme.Greenhouse.EntityFrameworkCo
 RUN dotnet restore "src/Acme.Greenhouse.Blazor/Acme.Greenhouse.Blazor.csproj"
 COPY . .
 WORKDIR "/src/src/Acme.Greenhouse.Blazor"
+RUN dotnet tool install -g Volo.Abp.Cli
+RUN npm install --global yarn
+RUN abp install-libs
+
 RUN dotnet build "Acme.Greenhouse.Blazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
