@@ -1,4 +1,6 @@
-﻿using Acme.Greenhouse.Nodes;
+﻿using Acme.Greenhouse.Devices;
+using Acme.Greenhouse.Nodes;
+using Acme.Greenhouse.Sensors;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;

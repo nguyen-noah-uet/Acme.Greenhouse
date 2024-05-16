@@ -1,4 +1,7 @@
-﻿using Acme.Greenhouse.Nodes;
+﻿using Acme.Greenhouse.Devices;
+using Acme.Greenhouse.Nodes;
+using Acme.Greenhouse.SensorData;
+using Acme.Greenhouse.Sensors;
 using System.Collections.Generic;
 
 namespace Acme.Greenhouse.Blazor.ViewModels
