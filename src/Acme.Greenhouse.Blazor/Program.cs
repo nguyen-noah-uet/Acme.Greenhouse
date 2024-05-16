@@ -57,6 +57,7 @@ public class Program
             {
                 Log.Information("Connecting to MQTT broker.");
                 var mqttClientOptions = new MqttClientOptionsBuilder()
+                    .WithClientId("Secure-Server")
                     .WithTcpServer(builder.Configuration["Mqtt:Server"])
                     .WithCredentials(builder.Configuration["Mqtt:User"], builder.Configuration["Mqtt:Password"])
                     .WithCleanSession()

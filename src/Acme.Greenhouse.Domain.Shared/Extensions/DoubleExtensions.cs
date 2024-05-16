@@ -7,6 +7,7 @@ namespace Acme.Greenhouse.Extensions
     {
         public static double Smooth(this double x)
         {
+            return x;
             var now = DateTime.Now;
             var hour = now.Hour;
             var minute = now.Minute;
