@@ -18,7 +18,7 @@ namespace Acme.Greenhouse.EntityFrameworkCore;
 
 [ReplaceDbContext(typeof(IIdentityDbContext))]
 [ReplaceDbContext(typeof(ITenantManagementDbContext))]
-[ConnectionStringName("AzureDb")]
+[ConnectionStringName("Default")]
 public class GreenhouseDbContext :
     AbpDbContext<GreenhouseDbContext>,
     IGreenhouseDbContext,
