@@ -13,20 +13,20 @@ namespace Acme.Greenhouse.Data
     public class GreenhouseDataSeedContributor : IDataSeedContributor, ITransientDependency
     {
         private readonly IRepository<Node, int> nodeRepo;
-        private readonly IRepository<NodeStatus, int> nodeStatusRepo;
+        private readonly IRepository<NodeStatus.NodeStatus, int> nodeStatusRepo;
         private readonly IRepository<Device, int> deviceRepo;
-        private readonly IRepository<DeviceStatus, int> deviceStatusRepo;
+        private readonly IRepository<DeviceStatus.DeviceStatus, int> deviceStatusRepo;
         private readonly IRepository<Sensor, int> sensorRepo;
-        private readonly IRepository<SensorData, int> sensorDataRepo;
+        private readonly IRepository<SensorData.SensorData, int> sensorDataRepo;
         private readonly ILogger<GreenhouseDataSeedContributor> logger;
 
         public GreenhouseDataSeedContributor(
             IRepository<Node, int> nodeRepo,
-            IRepository<NodeStatus, int> nodeStatusRepo,
+            IRepository<NodeStatus.NodeStatus, int> nodeStatusRepo,
             IRepository<Device, int> deviceRepo,
-            IRepository<DeviceStatus, int> deviceStatusRepo,
+            IRepository<DeviceStatus.DeviceStatus, int> deviceStatusRepo,
             IRepository<Sensor, int> sensorRepo,
-            IRepository<SensorData, int> sensorDataRepo,
+            IRepository<SensorData.SensorData, int> sensorDataRepo,
             ILogger<GreenhouseDataSeedContributor> logger
             )
         {

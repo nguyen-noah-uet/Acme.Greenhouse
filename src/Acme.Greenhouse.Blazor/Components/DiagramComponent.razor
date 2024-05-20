@@ -1,13 +1,15 @@
-﻿@        using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientatio    n
-@    using Acme.Greenhouse.Blazor.    Pages
-@    using Acme.Greenhouse.Blazor.V    iewModels
-@    using Acme.Greenhou    se.Extensions
-@    using Acme    .Greenhouse.Nodes
-@    using Microso    ft.Extensions.Lo    gging
-@    using MQTTn    et
-@    using MQTTnet.Client
-@    using     MQTTnet.Extensions.ManagedClient
-@    using Volo.Abp.Application.Dtos
+﻿@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using Acme.Greenhouse.Blazor.Pages
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Devices
+@using Acme.Greenhouse.Extensions
+@using Acme.Greenhouse.Nodes
+@using Acme.Greenhouse.Sensors
+@using Microsoft.Extensions.Logging
+@using MQTTnet
+@using MQTTnet.Client
+@using MQTTnet.Extensions.ManagedClient
+@using Volo.Abp.Application.Dtos
 @inject IManagedMqttClient MqttService
 @inject ILogger<DiagramComponent> Logger
 @inject INodeService NodeService

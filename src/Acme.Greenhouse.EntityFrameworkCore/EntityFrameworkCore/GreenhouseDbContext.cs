@@ -31,10 +31,10 @@ public class GreenhouseDbContext :
     public DbSet<Node> Nodes { get; set; }
     public DbSet<Sensor> Sensors { get; set; }
     public DbSet<Device> Devices { get; set; }
-    public DbSet<NodeStatus> NodeStatus { get; set; }
-    public DbSet<SensorData> SensorData { get; set; }
-    public DbSet<DeviceStatus> DeviceStatus { get; set; }
-    public DbSet<DbLog> DbLogs { get; set; }
+    public DbSet<NodeStatus.NodeStatus> NodeStatus { get; set; }
+    public DbSet<SensorData.SensorData> SensorData { get; set; }
+    public DbSet<DeviceStatus.DeviceStatus> DeviceStatus { get; set; }
+    public DbSet<DbLog.DbLog> DbLogs { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityDbContext and ITenantManagementDbContext

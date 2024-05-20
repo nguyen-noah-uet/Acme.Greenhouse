@@ -15,7 +15,7 @@
     <FluentAccordionItem>
         <HeadingTemplate>
             <div class="h5">
-                <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("#.#")) @Sensor.Sensor.Unit</span></div>
+                <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("N1")) @Sensor.Sensor.Unit</span></div>
             </div>
         </HeadingTemplate>
         <ChildContent>
@@ -50,7 +50,7 @@
             </div>
             <div class="d-flex justify-content-end">
                 <div class="h6">
-                    Current: @(Sensor.CurrentValue.ToString("#.#"))
+                    Current: @(Sensor.CurrentValue.ToString("N1"))
                 </div>
             </div>
             <div class="d-flex justify-content-end">
@@ -65,7 +65,7 @@
 else
 {
     <div class="text-center">
-        <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("#.#")) @Sensor.Sensor.Unit</span></div>
+        <div>@Sensor.Sensor.Name: <span style="background-color:@color;">@(Sensor.CurrentValue.ToString("N1")) @Sensor.Sensor.Unit</span></div>
     </div>
 }
 

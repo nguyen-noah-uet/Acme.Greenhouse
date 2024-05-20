@@ -12,8 +12,8 @@ namespace Acme.Greenhouse.EntityFrameworkCore
         public DbSet<Node> Nodes { get; }
         public DbSet<Sensor> Sensors { get; }
         public DbSet<Device> Devices { get; }
-        public DbSet<NodeStatus> NodeStatus { get; }
-        public DbSet<SensorData> SensorData { get; }
-        public DbSet<DeviceStatus> DeviceStatus { get; }
+        public DbSet<NodeStatus.NodeStatus> NodeStatus { get; }
+        public DbSet<SensorData.SensorData> SensorData { get; }
+        public DbSet<DeviceStatus.DeviceStatus> DeviceStatus { get; }
     }
 }

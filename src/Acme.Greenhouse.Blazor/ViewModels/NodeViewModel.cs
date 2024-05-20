@@ -25,6 +25,6 @@ namespace Acme.Greenhouse.Blazor.ViewModels
     {
         public SensorDto Sensor { get; set; }
         public double CurrentValue { get; set; } = double.NaN;
-        public List<SensorDataDto>? Data { get; set; } = default;
+        public List<SensorDataDto> Data { get; set; } = new();
     }
 }

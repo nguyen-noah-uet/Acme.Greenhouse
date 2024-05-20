@@ -1,19 +1,28 @@
 ﻿@page "/node-detail/{NodeId}"
-@            using Acme.Greenhouse.Blazor.Compo    nent    s
-@    using Acme.Greenhouse.Blaz    or.ViewM    odels
-@    using     Acme.Greenho    use.Nodes
-@    using     Microsoft.Exten    sions.Logging
-@    using Microsoft.Fluent    UI.AspNetCore.Compon    ents.DesignTokens
-@    using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using Acme.Greenhouse.Blazor.Components
+@using Acme.Greenhouse.Blazor.ViewModels
+@using Acme.Greenhouse.Devices
+@using Acme.Greenhouse.Extensions
+@using Acme.Greenhouse.Nodes
+@using Acme.Greenhouse.SensorData
+@using Acme.Greenhouse.Sensors
+@using Microsoft.Extensions.Logging
+@using Microsoft.FluentUI.AspNetCore.Components.DesignTokens
+@using MQTTnet.Client
+@using MQTTnet.Extensions.ManagedClient
+@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using System.Text.RegularExpressions
+@using System.Text
+@using MQTTnet
 @inject INodeService NodeService
 @inject ISensorService SensorService
 @inject IDeviceService DeviceService
 @inject ISensorDataService SensorDataService
-
 @attribute [StreamRendering(true)]
 @attribute [Authorize]
 @rendermode RenderMode.InteractiveServer
 @inject IToastService ToastService
+@inject IManagedMqttClient MqttService
 @inject FillColor FillColor
 @inject BaseLayerLuminance BaseLayerLuminance
 @inherits GreenhouseComponentBase
@@ -34,12 +43,12 @@
         <FluentToolbar id="toolbar-fluent-components" @ref="Toolbar" Style="width: 100%">
             <FluentSelect TOption="string" ValueChanged="OptionChanged">
                 <FluentOption Value="Item 1" Selected="true">1 hour ago</FluentOption>
-                <FluentOption Value="Item 1">2 hour ago</FluentOption>
-                <FluentOption Value="Item 1">6 hour ago</FluentOption>
-                <FluentOption Value="Item 1">12 hour ago</FluentOption>
-                <FluentOption Value="Item 2">1 day ago</FluentOption>
+                <FluentOption Value="Item 2">2 hour ago</FluentOption>
+                <FluentOption Value="Item 3">6 hour ago</FluentOption>
+                <FluentOption Value="Item 4">12 hour ago</FluentOption>
+                <FluentOption Value="Item 5">1 day ago</FluentOption>
             </FluentSelect>
-            <FluentCheckbox @bind-Value=@_isCustomTime>Custom</FluentCheckbox>
+            <FluentCheckbox @bind-Value="@_isCustomTime">Custom</FluentCheckbox>
             @if (_isCustomTime)
             {
                 <FluentDatePicker Label="From" Value="FromDate" ValueChanged="@(e => FromDate = e.GetValueOrDefault())"/>
@@ -48,7 +57,7 @@
             }
             else
             {
-                <FluentCheckbox>Realtime</FluentCheckbox>
+                <FluentCheckbox ValueChanged="RealtimeCheckChanged" Disabled="_realtimeDisabled">Realtime</FluentCheckbox>
             }
             <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.ArrowExport())" OnClick="ExportToExcel" slot="end">
                 Export
@@ -56,10 +65,6 @@
             </FluentButton>
         </FluentToolbar>
         <div class="text-center h2 mb-4">@Node.Name</div>
-        <div class="align-content-center text-center">
-
-
-        </div>
         @if (_isCustomTime)
         {
             <div class="row mb-4">
@@ -67,15 +72,11 @@
                     <div class="h4">
                         <span>From</span>
                     </div>
-
-                    @* <FluentTimePicker Value="FromTime" ValueChanged="@(e => FromTime = e.GetValueOrDefault())" /> *@
                 </div>
                 <div class="col-md-6">
                     <div class="h4">
                         <span>To</span>
                     </div>
-
-                    @* <FluentTimePicker Value="ToTime" ValueChanged="@(e => ToTime = e.GetValueOrDefault())" /> *@
                 </div>
             </div>
         }
@@ -88,6 +89,13 @@
                     foreach (var sensor in NodeViewModel.Sensors)
                     {
                         <SensorStatComponent Sensor="sensor"/>
+                        <SfGrid ID="Grid" class="invisible" @ref="Grid" DataSource="@sensor.Data" AllowPaging="true" AllowExcelExport="true" AllowPdfExport="true">
+                            <GridColumns>
+                                <GridColumn Field=@nameof(SensorDataDto.SensorId) HeaderText="ID" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                                <GridColumn Field=@nameof(SensorDataDto.CreationTime) HeaderText="Time" Width="150"></GridColumn>
+                                <GridColumn Field=@nameof(SensorDataDto.Value) HeaderText="Value" Format="N1" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                            </GridColumns>
+                        </SfGrid>
                     }
                 }
             }
@@ -103,6 +111,8 @@
 @code {
     [Parameter] public string NodeId { get; set; } = default!;
     FluentToolbar? Toolbar;
+    private bool _realtime = false;
+    private bool _realtimeDisabled = false;
     private DateTime _fromDate = DateTime.Now.AddDays(-1);
 
     private DateTime FromDate
@@ -156,6 +166,7 @@
     public bool Loaded { get; set; }
     private string _selectedOption;
     private bool _isCustomTime;
+    private SfGrid<SensorDataDto> Grid = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -183,36 +194,44 @@
 
     private async Task GetData(DateTime? from = null, DateTime? to = null)
     {
-        await InvokeAsync(() =>
+        try
         {
-            Loaded = false;
-            StateHasChanged();
-        });
-        var now = DateTime.Now;
-        if (from is null || to is null)
-        {
-            from = new DateTime(FromDate.Year, FromDate.Month, FromDate.Day, 0, 0, 0);
-            to = new DateTime(ToDate.Year, ToDate.Month, ToDate.Day, 0, 0, 0);
-        }
+            await InvokeAsync(() =>
+            {
+                Loaded = false;
+                StateHasChanged();
+            });
+            var now = DateTime.Now;
+            if (from is null || to is null)
+            {
+                from = new DateTime(FromDate.Year, FromDate.Month, FromDate.Day, 0, 0, 0);
+                to = new DateTime(ToDate.Year, ToDate.Month, ToDate.Day, 0, 0, 0);
+            }
 
-        NodeViewModel = new NodeViewModel()
-        {
-            Node = Node!,
-            Sensors = (await SensorService.GetByNodeId(Node!.Id)).Select(x => new SensorViewModel()
+            NodeViewModel = new NodeViewModel()
             {
-                Sensor = x,
-                Data = SensorDataService.GetByDate(x.Id, from.Value, to.Value).Result
-            }).ToList(),
-            Devices = (await DeviceService.GetByNodeId(Node.Id)).Select(x => new DeviceViewModel()
+                Node = Node!,
+                Sensors = (await SensorService.GetByNodeId(Node!.Id)).Select(x => new SensorViewModel()
+                {
+                    Sensor = x,
+                    Data = SensorDataService.GetByDate(x.Id, from.Value, to.Value).Result
+                }).ToList(),
+                Devices = (await DeviceService.GetByNodeId(Node.Id)).Select(x => new DeviceViewModel()
+                {
+                    Device = x
+                }).ToList()
+            };
+            await InvokeAsync(() =>
             {
-                Device = x
-            }).ToList()
-        };
-        await InvokeAsync(() =>
+                Loaded = true;
+                StateHasChanged();
+            });
+        }
+        catch (Exception e)
         {
-            Loaded = true;
-            StateHasChanged();
-        });
+            ToastService.ShowError(title: "Error", timeout: 2000);
+            Logger.LogError(e.Message);
+        }
     }
 
     private async Task ApplyCustomTime()
@@ -241,6 +260,9 @@
         if (arg is null)
             return;
         _selectedOption = arg;
+        _realtimeDisabled = arg != "Item 1";
+        if (_realtimeDisabled)
+            _realtime = false;
         var now = DateTime.Now;
         switch (arg)
         {
@@ -264,7 +286,59 @@
 
     private async Task ExportToExcel()
     {
-        ToastService.ShowDownload(title: "Not work yet", timeout: 2000);
+        ToastService.ShowDownload(title: "Downloading", timeout: 2000);
+        if (NodeViewModel == null || NodeViewModel.Sensors == null)
+        {
+            return;
+        }
+
+        foreach (var sensor in NodeViewModel.Sensors)
+        {
+            await this.Grid.ExportToExcelAsync();
+        }
+    }
+
+    private Task RealtimeCheckChanged(bool val)
+    {
+        if (val)
+        {
+            MqttService.ApplicationMessageReceivedAsync += ApplicationMessageReceived;
+        }
+        else
+        {
+            MqttService.ApplicationMessageReceivedAsync -= ApplicationMessageReceived;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+    {
+        try
+        {
+            var topic = e.ApplicationMessage.Topic;
+            Regex regex = new(@"sensors\/([a-f,0-9,-]+)\/");
+
+            var match = regex.Match(topic);
+            if (match.Success)
+            {
+                var sensorId = int.Parse(match.Groups[1].Value);
+                if (NodeViewModel != null && NodeViewModel.Sensors != null && NodeViewModel.Sensors.Any(s => s.Sensor.Id == sensorId))
+                {
+                    var now = DateTime.Now;
+                    await GetData(now.AddHours(-1), now);
+                    var sensorVm = NodeViewModel.Sensors.Single(s => s.Sensor.Id == sensorId);
+                    var value = double.Parse(e.ApplicationMessage.ConvertPayloadToString());
+                    sensorVm.Data.Add(new SensorDataDto() { SensorId = sensorId, Value = value, CreationTime = DateTime.Now });
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError(title: "Error", timeout: 2000);
+            Logger.LogError(ex.Message);
+        }
     }
 
 }
