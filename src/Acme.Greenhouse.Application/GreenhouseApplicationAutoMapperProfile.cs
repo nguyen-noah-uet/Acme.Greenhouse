@@ -22,13 +22,13 @@ public class GreenhouseApplicationAutoMapperProfile : Profile
         CreateMap<SensorCreateUpdateDto, Sensor>();
         CreateMap<Device, DeviceDto>();
         CreateMap<DeviceCreateUpdateDto, Device>();
-        CreateMap<NodeStatus, NodeStatusDto>();
-        CreateMap<NodeStatusCreateDto, NodeStatus>();
-        CreateMap<SensorData, SensorDataDto>();
-        CreateMap<SensorDataCreateDto, SensorData>();
-        CreateMap<DeviceStatus, DeviceStatusDto>();
-        CreateMap<DeviceStatusCreateDto, DeviceStatus>();
-        CreateMap<DbLog, DbLogDto>();
-        CreateMap<DbLogCreateDto, DbLog>();
+        CreateMap<NodeStatus.NodeStatus, NodeStatusDto>();
+        CreateMap<NodeStatusCreateDto, NodeStatus.NodeStatus>();
+        CreateMap<SensorData.SensorData, SensorDataDto>();
+        CreateMap<SensorDataCreateDto, SensorData.SensorData>();
+        CreateMap<DeviceStatus.DeviceStatus, DeviceStatusDto>();
+        CreateMap<DeviceStatusCreateDto, DeviceStatus.DeviceStatus>();
+        CreateMap<DbLog.DbLog, DbLogDto>();
+        CreateMap<DbLogCreateDto, DbLog.DbLog>();
     }
 }
