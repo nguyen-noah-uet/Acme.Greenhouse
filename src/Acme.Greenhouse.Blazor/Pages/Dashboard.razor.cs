@@ -131,7 +131,7 @@ public partial class Dashboard
                     AutoMode = currentMode;
                     var message = AutoMode ? "Changed MANUAL_MODE to AUTO_MODE" : "Changed AUTO_MODE to MANUAL_MODE";
                     await DbLogService.CreateAsync(new() { Message = message });
-                    await RefreshLog();
+                    await InvokeAsync(StateHasChanged);
                 }
             }
         }
@@ -144,7 +144,7 @@ public partial class Dashboard
         {
             await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}/", PayloadSegment = Encoding.ASCII.GetBytes("1")});
             await DbLogService.CreateAsync(new() { Message = $"Sent turn on command to {device.Device.ToString()}" });
-            await RefreshLog();
+            //await RefreshLog();
         }
         catch (Exception ex)
         {
@@ -157,7 +157,7 @@ public partial class Dashboard
         {
             await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}/", PayloadSegment = Encoding.ASCII.GetBytes("0") });
             await DbLogService.CreateAsync(new() { Message = $"Sent turn off command to {device.Device.ToString()}" });
-            await RefreshLog();
+            //await RefreshLog();
         }
         catch (Exception ex)
         {
@@ -176,7 +176,7 @@ public partial class Dashboard
             await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"change-mode/1/", PayloadSegment = Encoding.ASCII.GetBytes("1") });
             await DbLogService.CreateAsync(new() { Message = $"Sent change MANUAL_MODE to AUTO_MODE command." });
         }
-        await RefreshLog();
+        // await RefreshLog();
     }
 
     private void HandleSearchInput()
