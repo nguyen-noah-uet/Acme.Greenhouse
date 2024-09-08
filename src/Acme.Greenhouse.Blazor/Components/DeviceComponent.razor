@@ -130,7 +130,7 @@ else
         int deviceId;
         var topic = e.ApplicationMessage.Topic;
         // device-status/{deviceId}/
-        Regex regex = new(@"device-status\/([a-f,0-9,-]+)\/");
+        Regex regex = new(@"device-status\/([a-f,0-9,-]+)");
         var match = regex.Match(topic);
         if (match.Success)
         {

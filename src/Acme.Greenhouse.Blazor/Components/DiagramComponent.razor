@@ -221,25 +221,25 @@
     private async Task LoadNodes()
     {
         // Load nodes
-        var nodes = await NodeService.GetListAsync(new PagedAndSortedResultRequestDto() { Sorting = "id" });
-        for (int i = 0; i < nodes.TotalCount; i++)
-        {
-            var m = new NodeViewModel()
-            {
-                Node = nodes.Items[i],
-                IsOnline = false,
-                Sensors = (await SensorService.GetByNodeId(nodes.Items[i].Id)).Select(x => new SensorViewModel() { Sensor = x }).ToList(),
-                Devices = (await DeviceService.GetByNodeId(nodes.Items[i].Id)).Select(x => new DeviceViewModel() { Device = x }).ToList()
-            };
-            _nodes.Add(m);
-        }
+        // var nodes = await NodeService.GetListAsync(new PagedAndSortedResultRequestDto() { Sorting = "id" });
+        // for (int i = 0; i < nodes.TotalCount; i++)
+        // {
+        //     var m = new NodeViewModel()
+        //     {
+        //         Node = nodes.Items[i],
+        //         IsOnline = false,
+        //         Sensors = (await SensorService.GetByNodeId(nodes.Items[i].Id)).Select(x => new SensorViewModel() { Sensor = x }).ToList(),
+        //         Devices = (await DeviceService.GetByNodeId(nodes.Items[i].Id)).Select(x => new DeviceViewModel() { Device = x }).ToList()
+        //     };
+        //     _nodes.Add(m);
+        // }
 
-        _pump1 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 1);
-        _pump2 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 2);
-        _pump3 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 3);
-        _soilMoisture = _nodes.FirstOrDefault(x => x.Node.Id == 2)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 1);
-        _pH = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 2);
-        _ec = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 3);
+        // _pump1 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 1);
+        // _pump2 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 2);
+        // _pump3 = _nodes.FirstOrDefault(x => x.Node.Id == 1)!.Devices!.FirstOrDefault(x => x.Device.Id == 3);
+        // _soilMoisture = _nodes.FirstOrDefault(x => x.Node.Id == 2)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 1);
+        // _pH = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 2);
+        // _ec = _nodes.FirstOrDefault(x => x.Node.Id == 3)!.Sensors!.FirstOrDefault(x => x.Sensor.Id == 3);
     }
 
 }

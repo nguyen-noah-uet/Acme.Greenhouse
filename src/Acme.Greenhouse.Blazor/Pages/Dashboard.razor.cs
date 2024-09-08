@@ -116,7 +116,7 @@ public partial class Dashboard
         var payloadString = e.ApplicationMessage.ConvertPayloadToString();
         var topic = e.ApplicationMessage.Topic!;
         // mode-node
-        regex = new(@"mode-node\/([0-9]+)\/");
+        regex = new(@"mode-node\/([0-9]+)");
         match = regex.Match(topic);
         if (match.Success)
         {
@@ -142,7 +142,7 @@ public partial class Dashboard
     {
         try
         {
-            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}/", PayloadSegment = Encoding.ASCII.GetBytes("1")});
+            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}", PayloadSegment = Encoding.ASCII.GetBytes("1")});
             await DbLogService.CreateAsync(new() { Message = $"Sent turn on command to {device.Device.ToString()}" });
         }
         catch (Exception ex)
@@ -154,7 +154,7 @@ public partial class Dashboard
     {
         try
         {
-            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}/", PayloadSegment = Encoding.ASCII.GetBytes("0") });
+            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"command/{device.Device.Id}", PayloadSegment = Encoding.ASCII.GetBytes("0") });
             await DbLogService.CreateAsync(new() { Message = $"Sent turn off command to {device.Device.ToString()}" });
         }
         catch (Exception ex)
@@ -166,12 +166,12 @@ public partial class Dashboard
     {
         if (AutoMode)
         {
-            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"change-mode/1/", PayloadSegment = Encoding.ASCII.GetBytes("0") });
+            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"change-mode/1", PayloadSegment = Encoding.ASCII.GetBytes("0") });
             await DbLogService.CreateAsync(new() { Message = $"Sent change AUTO_MODE to MANUAL_MODE command." });
         }
         else
         {
-            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"change-mode/1/", PayloadSegment = Encoding.ASCII.GetBytes("1") });
+            await MqttService.EnqueueAsync(new MqttApplicationMessage() { Topic = $"change-mode/1", PayloadSegment = Encoding.ASCII.GetBytes("1") });
             await DbLogService.CreateAsync(new() { Message = $"Sent change MANUAL_MODE to AUTO_MODE command." });
         }
     }

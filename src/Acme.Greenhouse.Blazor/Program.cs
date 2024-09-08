@@ -48,19 +48,23 @@ public class Program
                 .AddInteractiveServerComponents();
             builder.Services.AddScoped<ITooltipService, TooltipService>();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddTransient<IPAddressMiddleware>();
+            builder.Services.AddSingleton<IPAddressMiddleware>();
             builder.Services.AddHttpClient();
             builder.Services.AddFluentUIComponents();
             builder.Services.AddSyncfusionBlazor();
             builder.Services.AddHostedService<StoreDataBackgroundService>();
             builder.Services.AddSingleton<IManagedMqttClient>((_) =>
             {
-                Log.Information("Connecting to MQTT broker.");
+                Log.Information("Connecting to MQTT broker. {0} {1}", builder.Configuration["Mqtt:ClientId"], builder.Configuration["Mqtt:Server"]);
+
                 var mqttClientOptions = new MqttClientOptionsBuilder()
+                    .WithClientId(builder.Configuration["Mqtt:ClientId"])
                     .WithTcpServer(builder.Configuration["Mqtt:Server"])
-                    .WithCredentials(builder.Configuration["Mqtt:User"], builder.Configuration["Mqtt:Password"])
+                    .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V310)
+                    .WithKeepAlivePeriod(TimeSpan.FromSeconds(60))
+                    //.WithCredentials(builder.Configuration["Mqtt:User"], builder.Configuration["Mqtt:Password"])
                     .WithCleanSession()
-                    .WithTimeout(TimeSpan.FromSeconds(15))
+                    .WithTimeout(TimeSpan.FromSeconds(5))
                     .Build();
                 var managedMqttClientOptions = new ManagedMqttClientOptionsBuilder()
                     .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
@@ -69,17 +73,17 @@ public class Program
                 var client = new MqttFactory().CreateManagedMqttClient();
                 client.ConnectedAsync += e =>
                 {
-                    Log.Information("Connected to MQTT broker.");
+                    Log.Information("Connected to MQTT broker. {0} {1}", builder.Configuration["Mqtt:ClientId"], builder.Configuration["Mqtt:Server"]);
                     return Task.CompletedTask;
                 };
                 client.DisconnectedAsync += e =>
                 {
-                    Log.Error("Disconnected to MQTT broker.");
+                    Log.Error("Disconnected to MQTT broker.  {0} {1}", builder.Configuration["Mqtt:ClientId"], builder.Configuration["Mqtt:Server"]);
                     return Task.CompletedTask;
                 };
                 client.ConnectingFailedAsync += e =>
                 {
-                    Log.Error("Failed to reconnect to MQTT broker.");
+                    Log.Error("Failed to reconnect to MQTT broker. {0} {1}", builder.Configuration["Mqtt:ClientId"], builder.Configuration["Mqtt:Server"]);
                     return Task.CompletedTask;
                 };
                 client.StartAsync(managedMqttClientOptions).Wait();

@@ -44,21 +44,24 @@ namespace Acme.Greenhouse.Data
             {
                 logger.LogInformation("Seeding nodes data");
                 // seed 3 nodes
-                var controlNode = await nodeRepo.InsertAsync(new Node() { Name = "Control", Description = "Node for control pump relays" }, autoSave:true);
-                var sensorNode1 = await nodeRepo.InsertAsync(new Node() { Name = "Sensors 1", Description = "Node for soil moisture sensor" }, autoSave: true);
-                var sensorNode2 = await nodeRepo.InsertAsync(new Node() { Name = "Sensors 2", Description = "Node for pH, EC sensors" }, autoSave: true);
+                var controlNode = await nodeRepo.InsertAsync(new Node() { Name = "Control Node", Description = "Node for control devices" }, autoSave:true);
+                var sensorNode1 = await nodeRepo.InsertAsync(new Node() { Name = "Sensors Node", Description = "Node for sensors" }, autoSave: true);
+                //var sensorNode2 = await nodeRepo.InsertAsync(new Node() { Name = "Sensors 2", Description = "Node for pH, EC sensors" }, autoSave: true);
 
                 // seed 3 relay devices
-                var relay1 = await deviceRepo.InsertAsync(new Device() { Name = "Relay 1", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
-                var relay2 = await deviceRepo.InsertAsync(new Device() { Name = "Relay 2", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
-                var relay3 = await deviceRepo.InsertAsync(new Device() { Name = "Relay 3", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
+                var light = await deviceRepo.InsertAsync(new Device() { Name = "Light", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
+                var ecPump = await deviceRepo.InsertAsync(new Device() { Name = "EC pump", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
+                var phPump = await deviceRepo.InsertAsync(new Device() { Name = "pH pump", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
+                var oxygenPump = await deviceRepo.InsertAsync(new Device() { Name = "Oxygen pump", DeviceType = DeviceType.Relay, NodeId = controlNode.Id }, autoSave: true);
 
                 // seed soil moisture sensor
-                var soilMoistureSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Soil Moisture", SensorType = SensorType.SoilMoisture, Unit = "%", LowThreshold = 75.0, HighThreshold = 80.0, NodeId = sensorNode1.Id }, autoSave: true);
+                //var soilMoistureSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Soil Moisture", SensorType = SensorType.SoilMoisture, Unit = "%", LowThreshold = 75.0, HighThreshold = 80.0, NodeId = sensorNode1.Id }, autoSave: true);
 
                 // seed pH, EC sensors
-                var phSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "pH", SensorType = SensorType.Ph, LowThreshold = 6.0, HighThreshold = 6.5, NodeId = sensorNode2.Id }, autoSave: true);
-                var ecSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "EC", SensorType = SensorType.Ec, Unit = "µS/cm", LowThreshold = 200.0, HighThreshold = 700.0, NodeId = sensorNode2.Id }, autoSave: true);
+                var phSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "pH", SensorType = SensorType.Ph, LowThreshold = 6.0, HighThreshold = 7.5, NodeId = sensorNode1.Id }, autoSave: true);
+                var ecSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "EC", SensorType = SensorType.Ec, Unit = "µS/cm", LowThreshold = 200.0, HighThreshold = 700.0, NodeId = sensorNode1.Id }, autoSave: true);
+                var humiditySensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Humidity", SensorType = SensorType.Humidity, Unit = "%", LowThreshold = 60.0, HighThreshold = 95.0, NodeId = sensorNode1.Id }, autoSave: true);
+                var temperatureSensor = await sensorRepo.InsertAsync(new Sensor() { Name = "Temperature", SensorType = SensorType.Temperature, Unit = "°C", LowThreshold = 20.0, HighThreshold = 37.0, NodeId = sensorNode1.Id }, autoSave: true);
                 logger.LogInformation("Data inserted.");
             }
         }

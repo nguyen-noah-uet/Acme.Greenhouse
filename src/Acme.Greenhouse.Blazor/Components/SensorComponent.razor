@@ -92,7 +92,7 @@ else
         int sensorId;
         var topic = e.ApplicationMessage.Topic;
         // device-status/{deviceId}/
-        Regex regex = new(@"sensors\/([a-f,0-9,-]+)\/");
+        Regex regex = new(@"sensors\/([a-f,0-9,-]+)");
 
         var match = regex.Match(topic);
         if (match.Success)

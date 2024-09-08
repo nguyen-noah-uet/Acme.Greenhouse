@@ -61,7 +61,7 @@ namespace Acme.Greenhouse.Blazor
             {
                 var payloadString = e.ApplicationMessage.ConvertPayloadToString();
                 var topic = e.ApplicationMessage.Topic;
-                Regex nodeStatusRegex = new(@"node-status\/([a-f,0-9,-]+)\/");
+                Regex nodeStatusRegex = new(@"node-status\/([a-f,0-9,-]+)");
                 var nodeStatusMatch = nodeStatusRegex.Match(topic);
                 if (nodeStatusMatch.Success)
                 {
@@ -74,7 +74,7 @@ namespace Acme.Greenhouse.Blazor
                     }
                     return;
                 }
-                Regex sensorRegex = new(@"sensors\/([a-f,0-9,-]+)\/");
+                Regex sensorRegex = new(@"sensors\/([a-f,0-9,-]+)");
                 var sensorMatch = sensorRegex.Match(topic);
                 if (sensorMatch.Success)
                 {
@@ -87,7 +87,7 @@ namespace Acme.Greenhouse.Blazor
                     await InsertSensorData(sensorId, sensorValue);
                     return;
                 }
-                Regex deviceStatusRegex = new(@"device-status\/([a-f,0-9,-]+)\/");
+                Regex deviceStatusRegex = new(@"device-status\/([a-f,0-9,-]+)");
                 var deviceStatusMatch = deviceStatusRegex.Match(topic);
                 if (deviceStatusMatch.Success)
                 {

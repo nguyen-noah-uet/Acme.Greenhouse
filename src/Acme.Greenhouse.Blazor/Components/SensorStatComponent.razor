@@ -62,41 +62,33 @@ else
         switch(Sensor.Sensor.SensorType)
         {
             case SensorType.Temperature:
-                HighValue = 30;
-                LowValue = 10;
                 MinValue = 0;
                 MaxValue = 45;
                 Interval = 10;
                 break;
             case SensorType.Humidity:
-                HighValue = 80;
-                LowValue = 20;
                 MinValue = 0;
                 MaxValue = 100;
                 Interval = 10;
                 break;
             case SensorType.SoilMoisture:
-                HighValue = 100;
-                LowValue = 75;
                 MinValue = 0;
                 MaxValue = 100;
                 Interval = 20;
                 break;
             case SensorType.Ph:
-                HighValue = 7.8;
-                LowValue = 7.0;
                 MinValue = 0;
                 MaxValue = 14;
                 Interval = 3;
                 break;
             case SensorType.Ec:
-                HighValue = 1900;
-                LowValue = 1400;
                 MinValue = 0;
                 MaxValue = 2500;
                 Interval = 500;
                 break;
         }
+        HighValue = Sensor.Sensor.HighThreshold;
+        LowValue = Sensor.Sensor.LowThreshold;
         stat = CalculateStat();
         loading = false;
     }
