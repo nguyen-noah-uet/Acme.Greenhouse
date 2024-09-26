@@ -1,0 +1,12 @@
+services:
+  app_db:
+    container_name: app_db
+
+  acme.greenhouse.blazor:
+    container_name: acme.greenhouse.blazor
+    image: ${DOCKER_REGISTRY-}acmegreenhouseblazor
+    build:
+      context: .
+      dockerfile: src/Acme.Greenhouse.Blazor/Dockerfile
+    ports:
+     - "8080:8080"

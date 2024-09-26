@@ -107,7 +107,7 @@ public class GreenhouseBlazorModule : AbpModule
         ConfigureUrls(configuration);
         ConfigureBundles();
         ConfigureAutoMapper();
-        ConfigureVirtualFileSystem(hostingEnvironment);
+        //ConfigureVirtualFileSystem(hostingEnvironment);
         ConfigureSwaggerServices(context.Services);
         ConfigureAutoApiControllers();
         ConfigureBlazorise(context);
